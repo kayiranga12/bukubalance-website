@@ -1,1 +1,2 @@
-node_modules/ dist/ .env .vite/ *.log
+node_modules/ dist/ .env .vite/ *.loggit remote add origin https://github.com/YOUR_USERNAME/bukubalance-website.git
+node_modules
