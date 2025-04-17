@@ -12,7 +12,8 @@ function Contact() {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  
+  const [submitError, setSubmitError] = useState('');
+
   const validateForm = () => {
     const newErrors = {};
     
@@ -37,31 +38,45 @@ function Contact() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setSubmitError(''); // Clear error on change
   };
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (validateForm()) {
       setIsSubmitting(true);
+      setSubmitError('');
       
-      // Simulate form submission
-      setTimeout(() => {
-        setIsSubmitting(false);
-        setSubmitSuccess(true);
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          service: '',
-          message: ''
+      try {
+        const response = await fetch('https://formspree.io/f/xldjkyal', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(formData)
         });
         
-        // Reset success message after 5 seconds
-        setTimeout(() => {
-          setSubmitSuccess(false);
-        }, 5000);
-      }, 1500);
+        if (response.ok) {
+          setSubmitSuccess(true);
+          setFormData({
+            name: '',
+            email: '',
+            phone: '',
+            service: '',
+            message: ''
+          });
+          setTimeout(() => setSubmitSuccess(false), 5000);
+        } else {
+          throw new Error('Form submission failed');
+        }
+      // eslint-disable-next-line no-unused-vars
+      } catch (error) {
+        setSubmitError('Failed to send message. Please try again later.');
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
   
@@ -97,7 +112,26 @@ function Contact() {
               </div>
             ) : null}
             
-            <form onSubmit={handleSubmit} className="space-y-6">
+            {submitError ? (
+              <div className="bg-red-100 text-red-700 p-4 rounded-md mb-6">
+                <p className="font-medium">{submitError}</p>
+              </div>
+            ) : null}
+            
+            <form 
+              onSubmit={handleSubmit} 
+              className="space-y-6"
+              data-netlify="true"
+              name="contact"
+              netlify-honeypot="bot-field"
+            >
+              <input type="hidden" name="form-name" value="contact" />
+              <p className="hidden">
+                <label>
+                  Don’t fill this out if you're human: <input name="bot-field" />
+                </label>
+              </p>
+              
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-coffee-brown mb-1">
                   Name <span className="text-red-500">*</span>
@@ -176,7 +210,7 @@ function Contact() {
               </div>
               
               <div>
-              <label htmlFor="message" className="block text-sm font-medium text-coffee-brown mb-1">
+                <label htmlFor="message" className="block text-sm font-medium text-coffee-brown mb-1">
                   Message <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -314,7 +348,6 @@ function Contact() {
                     <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z" />
                   </svg>
                 </a>
-
                 <a
                   href="https://www.youtube.com/@frederickmunyehirwe4691"
                   target="_blank"
@@ -326,8 +359,6 @@ function Contact() {
                     <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 4-8 4z" />
                   </svg>
                 </a>
-
-                
               </div>
             </div>
           </div>
